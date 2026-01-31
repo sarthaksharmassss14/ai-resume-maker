@@ -1,0 +1,45 @@
+cv:
+  name: Sarthak Developer
+  location: San Francisco, CA
+  email: sarthak@example.com
+  phone: +1 555 123 4567
+  social_networks:
+    - network: LinkedIn
+      username: sarthakdev
+    - network: GitHub
+      username: sarthakdev
+  sections:
+    summary:
+      - Senior Software Engineer with a focus on Agentic AI and Full-stack Development.
+      - Proven track record of building scalable web applications using Next.js and Supabase.
+    experience:
+      - company: Google DeepMind
+        position: AI Research Engineer
+        location: London, UK
+        start_date: 2023-01
+        end_date: present
+        highlights:
+          - Led the development of "Antigravity", a high-performance LLM orchestration framework.
+          - Optimized inference latency by 35% through custom CUDA kernels.
+          - Mentored a team of 5 junior engineers on production-grade AI systems.
+      - company: Tech Startup X
+        position: Full Stack Developer
+        location: Remote
+        start_date: 2021-06
+        end_date: 2022-12
+        highlights:
+          - Built a real-time collaboration tool using WebSockets and Redis.
+          - Scaled user base from 0 to 100k Monthly Active Users in 6 months.
+    education:
+      - institution: Stanford University
+        area: Computer Science
+        degree: Master of Science
+        start_date: 2019-09
+        end_date: 2021-06
+    skills:
+      - label: Languages
+        details: Python, TypeScript, Go, C++
+      - label: Frameworks
+        details: Next.js, React, LangChain, PyTorch
+      - label: Tools
+        details: Docker, Kubernetes, AWS, Supabase
