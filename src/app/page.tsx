@@ -92,7 +92,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white p-8 font-sans selection:bg-primary/30">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
         {/* Left Side: Controls & Info */}
         <div className="space-y-8">
@@ -162,10 +162,11 @@ export default function Home() {
                 </div>
               </div>
               <textarea
-                className="w-full h-32 bg-white/5 rounded-xl border border-white/10 p-4 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                className="w-full h-32 bg-white/5 rounded-xl border border-white/10 p-4 focus:outline-none focus:border-primary/50 transition-colors resize-none relative z-50 cursor-text text-white !select-text pointer-events-auto isolate selection:bg-blue-500 selection:text-white"
                 placeholder="Paste JD here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
+                style={{ userSelect: "text", WebkitUserSelect: "text" }}
               />
             </Card>
 

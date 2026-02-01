@@ -321,16 +321,16 @@ ${exp.bullets.map(b => `          - ${b}`).join('\n')}`).join('\n')}
                 doc.setFontSize(11);
                 doc.setTextColor(0, 0, 0);
 
-                doc.text(exp.role, margin, y);
+                doc.text(exp.role || "Role", margin, y);
 
                 doc.setFont("times", "italic");
-                const dateStr = `${exp.startDate} - ${exp.endDate || 'Present'}`;
+                const dateStr = `${exp.startDate || ''} - ${exp.endDate || 'Present'}`;
                 doc.text(dateStr, pageWidth - margin, y, { align: "right" });
                 y += 14;
 
                 // Company (Italic Left) & Location (Right)
                 doc.setFont("times", "italic");
-                doc.text(exp.company, margin, y);
+                doc.text(exp.company || "Company", margin, y);
                 if (exp.location) {
                     doc.text(exp.location, pageWidth - margin, y, { align: "right" });
                 }
@@ -474,20 +474,20 @@ ${exp.bullets.map(b => `          - ${b}`).join('\n')}`).join('\n')}
                 <h3 className="text-xl font-bold flex items-center gap-3">
                     <CheckCircle className="text-green-500 w-6 h-6" /> Key Improvements
                 </h3>
-                <div className="flex flex-wrap gap-4">
-                    {improvements.map((improvement, i) => (
-                        <motion.div
+                <ul className="space-y-3">
+                    {Array.from(new Set(improvements)).map((improvement, i) => (
+                        <motion.li
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1 }}
                             key={i}
-                            className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5"
+                            className="flex items-start gap-3"
                         >
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                            <p className="text-sm text-white/80">{improvement}</p>
-                        </motion.div>
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                            <p className="text-sm text-white/80 leading-relaxed">{improvement}</p>
+                        </motion.li>
                     ))}
-                </div>
+                </ul>
             </Card>
 
             <div className="flex gap-4 relative z-10 w-full">

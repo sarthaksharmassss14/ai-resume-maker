@@ -59,7 +59,9 @@ export async function POST(req: Request) {
                 resumeData: result.optimizedResumeJson || result.resumeJson,
                 yaml: result.rendercvYaml,
                 improvements: [
-                    ... (result.initialAtsData?.missing_keywords.map((k: string) => `Integrated missing keyword: ${k}`) || []),
+                    result.initialAtsData?.missing_keywords?.length
+                        ? `Integrated missing keywords: ${result.initialAtsData.missing_keywords.join(', ')}`
+                        : "Optimized keyword density based on JD",
                     "Rewrote experience highlights for better ATS impact",
                     "Optimized structure for RenderCV compatibility"
                 ]
