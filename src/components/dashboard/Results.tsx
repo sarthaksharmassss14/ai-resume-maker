@@ -58,7 +58,7 @@ export function Results({
         setIsEditing(false);
     };
 
-    const updatePersonal = (field: string, value: string) => {
+    const updatePersonal = (field: string, value: any) => {
         setResumeData(prev => ({
             ...prev,
             personal: { ...prev.personal, [field]: value }
@@ -705,10 +705,10 @@ export function Results({
                                                         <input
                                                             value={link.label}
                                                             onChange={(e) => {
-                                                                const newLinks = [...(resumeData.personal.links || [])];
-                                                                const originalIndex = resumeData.personal.links!.indexOf(link);
-                                                                if (originalIndex !== -1) {
-                                                                    newLinks[originalIndex].label = e.target.value;
+                                                                const originalIndex = resumeData.personal.links?.indexOf(link);
+                                                                if (originalIndex !== undefined && originalIndex !== -1) {
+                                                                    const newLinks = [...(resumeData.personal.links || [])];
+                                                                    newLinks[originalIndex] = { ...newLinks[originalIndex], label: e.target.value };
                                                                     updatePersonal('links', newLinks);
                                                                 }
                                                             }}
@@ -857,9 +857,11 @@ export function Results({
                                                         <input
                                                             value={cat.category + ": "}
                                                             onChange={(e) => {
-                                                                const newSkills = [...resumeData.skills];
-                                                                newSkills[ci].category = e.target.value.replace(": ", "");
-                                                                setResumeData(prev => ({ ...prev, skills: newSkills }));
+                                                                setResumeData(prev => {
+                                                                    const newSkills = [...prev.skills];
+                                                                    newSkills[ci] = { ...newSkills[ci], category: e.target.value.replace(": ", "") };
+                                                                    return { ...prev, skills: newSkills };
+                                                                });
                                                             }}
                                                             className="w-full outline-none bg-transparent p-0 m-0 border-none font-bold"
                                                         />
@@ -868,9 +870,11 @@ export function Results({
                                                         <textarea
                                                             value={cat.items.join(", ")}
                                                             onChange={(e) => {
-                                                                const newSkills = [...resumeData.skills];
-                                                                newSkills[ci].items = e.target.value.split(",").map(s => s.trim());
-                                                                setResumeData(prev => ({ ...prev, skills: newSkills }));
+                                                                setResumeData(prev => {
+                                                                    const newSkills = [...prev.skills];
+                                                                    newSkills[ci] = { ...newSkills[ci], items: e.target.value.split(",").map(s => s.trim()) };
+                                                                    return { ...prev, skills: newSkills };
+                                                                });
                                                             }}
                                                             className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none"
                                                             rows={Math.max(1, Math.ceil(cat.items.join(", ").length / 105))}
