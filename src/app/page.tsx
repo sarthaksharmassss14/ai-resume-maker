@@ -33,6 +33,8 @@ export default function Home() {
     resumeData: ResumeJSON;
     improvements: string[];
     yaml?: string;
+    missingKeywords?: string[];
+    matchedKeywords?: string[];
   } | null>(null);
 
   const startProcessing = async () => {
@@ -151,7 +153,7 @@ export default function Home() {
               </label>
             </Card>
 
-            <Card className="p-6 glass border-white/5 space-y-4">
+            <Card className="p-6 glass border-white/5 space-y-4 relative z-20">
               <div className="flex items-center gap-4 text-white/80">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                   <Briefcase className="w-5 h-5" />
@@ -162,11 +164,10 @@ export default function Home() {
                 </div>
               </div>
               <textarea
-                className="w-full h-32 bg-white/5 rounded-xl border border-white/10 p-4 focus:outline-none focus:border-primary/50 transition-colors resize-none relative z-50 cursor-text text-white !select-text pointer-events-auto isolate selection:bg-blue-500 selection:text-white"
+                className="w-full h-32 bg-white/10 rounded-xl border border-white/20 p-4 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none text-white cursor-text caret-primary"
                 placeholder="Paste JD here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
-                style={{ userSelect: "text", WebkitUserSelect: "text" }}
               />
             </Card>
 
@@ -235,8 +236,9 @@ export default function Home() {
                   initialScore={resultsData.initialScore}
                   finalScore={resultsData.finalScore}
                   resumeData={resultsData.resumeData}
-                  yaml={resultsData.yaml}
                   improvements={resultsData.improvements}
+                  missingKeywords={resultsData.missingKeywords}
+                  matchedKeywords={resultsData.matchedKeywords}
                 />
               )
             )}

@@ -44,6 +44,16 @@
   --ring: 263.4 70% 50.4%;
 }
 
+::selection {
+  background: #4d1fe6 !important;
+  color: #ffffff !important;
+}
+
+::-moz-selection {
+  background: #4d1fe6 !important;
+  color: #ffffff !important;
+}
+
 * {
   border-color: hsl(var(--border));
 }

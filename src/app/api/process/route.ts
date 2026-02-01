@@ -58,9 +58,11 @@ export async function POST(req: Request) {
                 finalScore: result.finalAtsData?.score || 0,
                 resumeData: result.optimizedResumeJson || result.resumeJson,
                 yaml: result.rendercvYaml,
+                missingKeywords: result.initialAtsData?.missing_keywords || [],
+                matchedKeywords: result.initialAtsData?.matched_keywords || [],
                 improvements: [
                     result.initialAtsData?.missing_keywords?.length
-                        ? `Integrated missing keywords: ${result.initialAtsData.missing_keywords.join(', ')}`
+                        ? `Integrated missing keywords: ${result.initialAtsData.missing_keywords.slice(0, 5).join(', ')}${result.initialAtsData.missing_keywords.length > 5 ? '...' : ''}`
                         : "Optimized keyword density based on JD",
                     "Rewrote experience highlights for better ATS impact",
                     "Optimized structure for RenderCV compatibility"

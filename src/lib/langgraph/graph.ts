@@ -10,12 +10,14 @@ export interface AgentState {
     initialAtsData: {
         score: number;
         missing_keywords: string[];
+        matched_keywords: string[];
         weak_sections: string[];
     } | null;
     optimizedResumeJson: ResumeJSON | null;
     finalAtsData: {
         score: number;
         missing_keywords: string[];
+        matched_keywords: string[];
         weak_sections: string[];
     } | null;
     rendercvYaml: string;
@@ -30,12 +32,14 @@ const StateAnnotation = Annotation.Root({
     initialAtsData: Annotation<{
         score: number;
         missing_keywords: string[];
+        matched_keywords: string[];
         weak_sections: string[];
     } | null>(),
     optimizedResumeJson: Annotation<ResumeJSON | null>(),
     finalAtsData: Annotation<{
         score: number;
         missing_keywords: string[];
+        matched_keywords: string[];
         weak_sections: string[];
     } | null>(),
     rendercvYaml: Annotation<string>(),
@@ -59,7 +63,8 @@ Rules:
 - Output ONLY valid JSON
 - Follow the provided schema exactly
 - Do not infer fake experience
-- If something is unclear, omit it
+- If something is unclear, omit it. Do NOT use placeholders like "University", "Company", or "Location" if the specific name is missing; instead, keep the raw text as is or omit the field.
+- Preserve the exact names of Institutions (Colleges/Universities) and Companies as they appear in the text.
 - The Resume Text contains embedded links in the format "[Link: URL]" right next to the text they belong to.
   - Example: "My Project [Link: https://github.com/me]" -> name: "My Project", link: "https://github.com/me"
   - Map these URLs to the 'link' or 'url' fields of the corresponding item.
@@ -132,6 +137,12 @@ To ensure consistency:
 4. **Education & Certifications**
    - Check against requirements.
 
+5. **SEMANTIC INFERENCE (Eliminate False Gaps)**:
+   - Identify when specific tools satisfy broader JD requirements.
+   - **Implicit Skill Resolution**: If user has React, Node, Express, and Mongo, consider "MERN" as a MATCHED skill.
+   - **Functional Translation**: Map specific tools to high-level requirements (e.g., Node.js -> Satisfies "Robust backend logic" and "RESTful APIs").
+   - **Full-stack**: Presence of both Frontend and Backend tools satisfies "Full-stack development".
+
 SCORING LOGIC:
 - **ORIGINAL V1**: 
   - Be **EXTREMELY CRITICAL**. 
@@ -152,6 +163,7 @@ Output ONLY JSON:
 {
   "score": number, 
   "missing_keywords": ["string"],
+  "matched_keywords": ["string"],
   "weak_sections": ["string"]
 }
 
@@ -184,9 +196,10 @@ ${state.rawJdText}`;
         return state.optimizedResumeJson ? { finalAtsData: result } : { initialAtsData: result };
     } catch (e) {
         console.error("ATS JSON parse error", e);
+        const fallback = { score: 0, missing_keywords: [], matched_keywords: [], weak_sections: [] };
         return state.optimizedResumeJson
-            ? { finalAtsData: { score: 0, missing_keywords: [], weak_sections: [] } }
-            : { initialAtsData: { score: 0, missing_keywords: [], weak_sections: [] } };
+            ? { finalAtsData: fallback }
+            : { initialAtsData: fallback };
     }
 };
 
@@ -213,12 +226,19 @@ STRICT CONSTRAINTS:
 2. **NO TECH STACK SWAPPING**: You must **PROTECT** the user's original tech stack inside Experience and Projects. 
    - If user wrote "Node.js", do NOT change it to "Django", "SpringBoot", or anything else. 
    - You can ADD new keywords from the JD *alongside* their existing ones, but never replace their original stack.
-3. **SKILLS SECTION**: You are explicitly allowed to **ADD** missing JD-required skills to the \`skills\` array, provided they are alongside the user's original skills.
-6. **FUNCTIONAL MIRRORING**: Rewrite existing bullet points to mirror the JD's functional requirements without lying:
+3. **PROTECT FACTUAL ENTRIES**: Do NOT change, generalize, or anonymize the names of Institutions (Colleges/Universities), Companies, or Locations. 
+   - If the user wrote "ABES Engineering College", do NOT change it to "University" or "Engineering College". 
+   - These are factual identities and must remain 100% identical to the input resume.
+   - Education fields (institution, degree, dates) are immutable facts unless specifically asked to map to missing degree types (which is rare).
+4. **SKILLS SECTION**: You are explicitly allowed to **ADD** missing JD-required skills to the \`skills\` array, provided they are alongside the user's original skills.
+6. **SEMANTIC INFERENCE**: Eliminate "false gaps" by identifying when specific tools satisfy broader JD requirements:
+   - **Implicit Skill Resolution**: If user has React, Node, Express, and Mongo, consider "MERN" as a MATCHED skill.
+   - **Functional Translation**: Map specific tools to high-level JD descriptions (e.g., Node/Express -> "Robust backend logic", React -> "Responsive UIs").
+7. **FUNCTIONAL MIRRORING & BRIDGING**: Rewrite existing bullet points to mirror the JD's functional requirements and bridge implementation:
+   - Append the JD's phrasing to existing bullets. Example: "Developed a Full-stack application with RESTful APIs using Node.js and Express.js."
    - If JD asks for "Build reusable code" and user wrote "Wrote a React component", rewrite as "Developed a library of reusable components to improve engineering efficiency."
-   - If JD asks for "AI-native platform" and user "Used an LLM API", rewrite as "Engineered an AI-native feature using RAG/LLMs to unify disparate data sources."
    - Focus on the *impact* and *intent* described in the JD.
-7. **STRATEGIC REORDERING**: Maximize ATS "High-Value" zones (top third):
+8. **STRATEGIC REORDERING**: Maximize ATS "High-Value" zones (top third):
    - **Skills Section**: Reorder the \`skills\` array so that the 5-7 most JD-relevant skills (including target keywords) appear at the VERY START.
    - **Project Weighting**: Reorder the \`projects\` array to place the project that most closely matches the JD/Role at the top.
 8. **Keyword Frequency**: For the top keywords (${keywords}), mention them in the Summary AND in at least one existing Experience or Project bullet point by adding them to the description alongside existing tech.
