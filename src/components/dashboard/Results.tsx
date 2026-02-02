@@ -662,16 +662,16 @@ export function Results({
                                 style={{ fontFamily: '"Times New Roman", Times, serif' }}
                             >
                                 {/* SHEET 1 - 8.5 x 11 inches (Letter) converted to PX */}
-                                <div className="w-[816px] min-h-[1056px] bg-white text-black p-[75.6px] shadow-[0_0_60px_rgba(0,0,0,0.3)] flex flex-col relative text-[0] leading-none">
-                                    {/* Name Section - Size 24pt (32px) */}
-                                    <div className="text-center mb-[18.6px]">
+                                <div className="w-[816px] min-h-[1056px] bg-white text-black p-[56.7pt] shadow-[0_0_60px_rgba(0,0,0,0.3)] flex flex-col relative text-[0] leading-none">
+                                    {/* Name Section - Size 24pt */}
+                                    <div className="text-center mb-[18pt]">
                                         <input
                                             value={resumeData.personal.name}
                                             onChange={(e) => updatePersonal('name', e.target.value)}
-                                            className="w-full text-[32px] font-bold text-center outline-none bg-transparent p-0 m-0 border-none leading-none"
+                                            className="w-full text-[24pt] font-bold text-center outline-none bg-transparent p-0 m-0 border-none leading-none"
                                             placeholder="Full Name"
                                         />
-                                        <div className="flex justify-center items-center text-[13.3px] font-normal whitespace-nowrap overflow-hidden mt-[5.3px]">
+                                        <div className="flex justify-center items-center text-[10pt] font-normal whitespace-nowrap overflow-hidden mt-[4pt]">
                                             <input
                                                 value={resumeData.personal.location}
                                                 onChange={(e) => updatePersonal('location', e.target.value)}
@@ -721,14 +721,14 @@ export function Results({
                                         </div>
                                     </div>
 
-                                    {/* Summary Section - Gap y+=6, FontSize 12pt, Line y+=4, Content y+=14 */}
+                                    {/* Summary Section */}
                                     {resumeData.summary && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Professional Summary</h3>
+                                        <div className="mb-[14pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Professional Summary</h3>
                                             <textarea
                                                 value={resumeData.summary}
                                                 onChange={(e) => setResumeData(prev => ({ ...prev, summary: e.target.value }))}
-                                                className="w-full bg-transparent outline-none hide-scrollbar text-[14.7px] leading-[17.3px] p-0 m-0 border-none"
+                                                className="w-full bg-transparent outline-none hide-scrollbar text-[11pt] leading-[14pt] p-0 m-0 border-none resize-none overflow-hidden"
                                                 rows={Math.max(1, Math.ceil(resumeData.summary.length / 90))}
                                             />
                                         </div>
@@ -736,38 +736,41 @@ export function Results({
 
                                     {/* Education Section */}
                                     {resumeData.education && resumeData.education.length > 0 && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Education</h3>
+                                        <div className="mb-[8pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Education</h3>
                                             {resumeData.education.map((edu, i) => (
-                                                <div key={i} className="mb-[18.6px]">
-                                                    <div className="flex justify-between items-baseline font-bold text-[14.7px] leading-[17.3px]">
+                                                <div key={i} className="mb-[8pt]">
+                                                    <div className="flex justify-between items-baseline font-bold text-[11pt] leading-[14pt]">
                                                         <input value={edu.institution} onChange={(e) => updateEducation(i, 'institution', e.target.value)} className="w-[70%] outline-none bg-transparent p-0 font-bold m-0 border-none" />
                                                         <input value={`${edu.startDate || ''} - ${edu.endDate || ''}`} onChange={(e) => {
                                                             const parts = e.target.value.split(' - ');
                                                             updateEducation(i, 'startDate', parts[0] || '');
                                                             updateEducation(i, 'endDate', parts[1] || '');
-                                                        }} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 border-none italic font-normal text-[14.7px]" />
+                                                        }} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 border-none italic font-normal text-[11pt]" />
                                                     </div>
-                                                    <div className="italic text-[14.7px] leading-[17.3px]">
+                                                    <div className="italic text-[11pt] leading-[14pt]">
                                                         <input value={edu.degree} onChange={(e) => updateEducation(i, 'degree', e.target.value)} className="w-full outline-none bg-transparent p-0 m-0 border-none italic" />
                                                     </div>
                                                     {edu.bullets && edu.bullets.length > 0 && (
-                                                        <ul className="list-none ml-0 mt-0 space-y-0">
-                                                            {edu.bullets.map((bullet, bi) => (
-                                                                <li key={bi} className="flex items-start mb-0">
-                                                                    <span className="mr-[13.3px] text-[14.7px] leading-[17.3px] shrink-0">•</span>
-                                                                    <textarea
-                                                                        value={bullet}
-                                                                        onChange={(e) => {
-                                                                            const newBullets = [...(edu.bullets || [])];
-                                                                            newBullets[bi] = e.target.value;
-                                                                            updateEducation(i, 'bullets', newBullets);
-                                                                        }}
-                                                                        className="w-full bg-transparent outline-none hide-scrollbar text-[14.7px] leading-[17.3px] p-0 m-0 border-none"
-                                                                        rows={Math.max(1, Math.ceil(bullet.length / 88))}
-                                                                    />
-                                                                </li>
-                                                            ))}
+                                                        <ul className="list-none ml-0 mt-0 space-y-0 text-[11pt] leading-[13pt]">
+                                                            {edu.bullets.map((bullet, bi) => {
+                                                                if (!bullet || !bullet.trim()) return null;
+                                                                return (
+                                                                    <li key={bi} className="flex items-start mb-0">
+                                                                        <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
+                                                                        <textarea
+                                                                            value={bullet}
+                                                                            onChange={(e) => {
+                                                                                const newBullets = [...(edu.bullets || [])];
+                                                                                newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                                updateEducation(i, 'bullets', newBullets);
+                                                                            }}
+                                                                            className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
+                                                                            rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
+                                                                        />
+                                                                    </li>
+                                                                );
+                                                            })}
                                                         </ul>
                                                     )}
                                                 </div>
@@ -777,38 +780,41 @@ export function Results({
 
                                     {/* Experience Section */}
                                     {resumeData.experience && resumeData.experience.length > 0 && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Experience</h3>
+                                        <div className="mb-[14pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Experience</h3>
                                             {resumeData.experience.map((exp, i) => (
-                                                <div key={i} className="mb-[18.6px]">
-                                                    <div className="flex justify-between items-baseline font-bold text-[14.7px] leading-[17.3px]">
+                                                <div key={i} className="mb-[8pt]">
+                                                    <div className="flex justify-between items-baseline font-bold text-[11pt] leading-[14pt]">
                                                         <input value={exp.role} onChange={(e) => updateExperience(i, 'role', e.target.value)} className="w-[70%] outline-none bg-transparent p-0 font-bold" />
                                                         <input value={`${exp.startDate || ''} - ${exp.endDate || ''}`} onChange={(e) => {
                                                             const parts = e.target.value.split(' - ');
                                                             updateExperience(i, 'startDate', parts[0]);
                                                             updateExperience(i, 'endDate', parts[1]);
-                                                        }} className="w-[30%] text-right outline-none bg-transparent p-0 italic font-normal text-[14.7px]" />
+                                                        }} className="w-[30%] text-right outline-none bg-transparent p-0 italic font-normal text-[11pt]" />
                                                     </div>
-                                                    <div className="flex justify-between items-baseline italic text-[14.7px] leading-[17.3px]">
+                                                    <div className="flex justify-between items-baseline italic text-[11pt] leading-[14pt]">
                                                         <input value={exp.company} onChange={(e) => updateExperience(i, 'company', e.target.value)} className="w-[60%] outline-none bg-transparent p-0 italic" />
                                                         <input value={exp.location} onChange={(e) => updateExperience(i, 'location', e.target.value)} className="w-[40%] text-right outline-none bg-transparent p-0 italic" />
                                                     </div>
-                                                    <ul className="list-none ml-0 mt-0 space-y-0">
-                                                        {exp.bullets.map((bullet, bi) => (
-                                                            <li key={bi} className="flex items-start mb-0">
-                                                                <span className="mr-[13.3px] text-[14.7px] leading-[17.3px] shrink-0">•</span>
-                                                                <textarea
-                                                                    value={bullet}
-                                                                    onChange={(e) => {
-                                                                        const newBullets = [...exp.bullets];
-                                                                        newBullets[bi] = e.target.value;
-                                                                        updateExperience(i, 'bullets', newBullets);
-                                                                    }}
-                                                                    className="w-full bg-transparent outline-none hide-scrollbar text-[14.7px] leading-[17.3px] p-0 m-0 border-none"
-                                                                    rows={Math.max(1, Math.ceil(bullet.length / 88))}
-                                                                />
-                                                            </li>
-                                                        ))}
+                                                    <ul className="list-none ml-0 mt-0 space-y-0 text-[11pt] leading-[13pt]">
+                                                        {exp.bullets.map((bullet, bi) => {
+                                                            if (!bullet || !bullet.trim()) return null;
+                                                            return (
+                                                                <li key={bi} className="flex items-start mb-0">
+                                                                    <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
+                                                                    <textarea
+                                                                        value={bullet}
+                                                                        onChange={(e) => {
+                                                                            const newBullets = [...exp.bullets];
+                                                                            newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                            updateExperience(i, 'bullets', newBullets);
+                                                                        }}
+                                                                        className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
+                                                                        rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
+                                                                    />
+                                                                </li>
+                                                            );
+                                                        })}
                                                     </ul>
                                                 </div>
                                             ))}
@@ -817,30 +823,33 @@ export function Results({
 
                                     {/* Projects Section - Gap y+=8, Content y+=14 */}
                                     {resumeData.projects && resumeData.projects.length > 0 && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Projects</h3>
+                                        <div className="mb-[14pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Projects</h3>
                                             {resumeData.projects.map((project, i) => (
-                                                <div key={i} className="mb-[18.6px]">
-                                                    <div className="flex justify-between items-baseline font-bold text-[14.7px] leading-[17.3px]">
+                                                <div key={i} className="mb-[8pt]">
+                                                    <div className="flex justify-between items-baseline font-bold text-[11pt] leading-[14pt]">
                                                         <input value={project.name} onChange={(e) => updateProject(i, 'name', e.target.value)} className="w-[70%] outline-none bg-transparent p-0 m-0 border-none font-bold underline" />
-                                                        <input value={project.link || ''} onChange={(e) => updateProject(i, 'link', e.target.value)} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 italic font-normal underline text-[14.7px]" placeholder="github.com" />
+                                                        <input value={project.link || ''} onChange={(e) => updateProject(i, 'link', e.target.value)} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 italic font-normal underline text-[10pt]" placeholder="github.com" />
                                                     </div>
-                                                    <ul className="list-none ml-0 mt-0 space-y-0">
-                                                        {project.bullets.map((bullet, bi) => (
-                                                            <li key={bi} className="flex items-start mb-0">
-                                                                <span className="mr-[13.3px] text-[14.7px] leading-[17.3px] shrink-0">•</span>
-                                                                <textarea
-                                                                    value={bullet}
-                                                                    onChange={(e) => {
-                                                                        const newBullets = [...project.bullets];
-                                                                        newBullets[bi] = e.target.value;
-                                                                        updateProject(i, 'bullets', newBullets);
-                                                                    }}
-                                                                    className="w-full bg-transparent outline-none hide-scrollbar text-[14.7px] leading-[17.3px] p-0 m-0 border-none"
-                                                                    rows={Math.max(1, Math.ceil(bullet.length / 88))}
-                                                                />
-                                                            </li>
-                                                        ))}
+                                                    <ul className="list-none ml-0 mt-0 space-y-0 text-[11pt] leading-[13pt]">
+                                                        {project.bullets.map((bullet, bi) => {
+                                                            if (!bullet || !bullet.trim()) return null;
+                                                            return (
+                                                                <li key={bi} className="flex items-start mb-0">
+                                                                    <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
+                                                                    <textarea
+                                                                        value={bullet}
+                                                                        onChange={(e) => {
+                                                                            const newBullets = [...project.bullets];
+                                                                            newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                            updateProject(i, 'bullets', newBullets);
+                                                                        }}
+                                                                        className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
+                                                                        rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
+                                                                    />
+                                                                </li>
+                                                            );
+                                                        })}
                                                     </ul>
                                                 </div>
                                             ))}
@@ -849,11 +858,11 @@ export function Results({
 
                                     {/* Technologies Section - PDF Tight Logic (y+=2 padding) */}
                                     {resumeData.skills && resumeData.skills.length > 0 && (
-                                        <div className="mb-[18.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Technologies</h3>
+                                        <div className="mb-[14pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Technologies</h3>
                                             {resumeData.skills.map((cat, ci) => (
-                                                <div key={ci} className="mb-[2.6px] flex text-[14.7px] leading-[17.3px] items-start">
-                                                    <div className="w-fit min-w-[100px] font-bold shrink-0">
+                                                <div key={ci} className="mb-[2pt] flex text-[11pt] leading-[13pt] items-start">
+                                                    <div className="w-fit font-bold shrink-0">
                                                         <input
                                                             value={cat.category + ": "}
                                                             onChange={(e) => {
@@ -863,7 +872,8 @@ export function Results({
                                                                     return { ...prev, skills: newSkills };
                                                                 });
                                                             }}
-                                                            className="w-full outline-none bg-transparent p-0 m-0 border-none font-bold"
+                                                            className="outline-none bg-transparent p-0 m-0 border-none font-bold"
+                                                            style={{ width: `${(cat.category.length + 2) * 6.5}px` }}
                                                         />
                                                     </div>
                                                     <div className="flex-1">
@@ -876,8 +886,8 @@ export function Results({
                                                                     return { ...prev, skills: newSkills };
                                                                 });
                                                             }}
-                                                            className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none"
-                                                            rows={Math.max(1, Math.ceil(cat.items.join(", ").length / 105))}
+                                                            className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none leading-[13pt] resize-none overflow-hidden"
+                                                            rows={Math.max(1, Math.ceil(cat.items.join(", ").length / 90))}
                                                         />
                                                     </div>
                                                 </div>
@@ -887,15 +897,15 @@ export function Results({
 
                                     {/* Certifications Section */}
                                     {resumeData.certifications && resumeData.certifications.length > 0 && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Certifications</h3>
+                                        <div className="mb-[8pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Certifications</h3>
                                             {resumeData.certifications.map((cert, i) => (
-                                                <div key={i} className="mb-[14.7px]">
-                                                    <div className="flex justify-between items-baseline font-bold text-[14.7px] leading-[17.3px]">
+                                                <div key={i} className="mb-[8pt]">
+                                                    <div className="flex justify-between items-baseline font-bold text-[11pt] leading-[14pt]">
                                                         <input value={cert.name} onChange={(e) => updateCertification(i, 'name', e.target.value)} className="w-[70%] outline-none bg-transparent p-0 m-0 border-none font-bold underline" />
-                                                        <input value={cert.date} onChange={(e) => updateCertification(i, 'date', e.target.value)} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 italic font-normal text-[14.7px]" />
+                                                        <input value={cert.date} onChange={(e) => updateCertification(i, 'date', e.target.value)} className="w-[30%] text-right outline-none bg-transparent p-0 m-0 italic font-normal text-[11pt]" />
                                                     </div>
-                                                    <input value={cert.issuer} onChange={(e) => updateCertification(i, 'issuer', e.target.value)} className="w-full outline-none bg-transparent p-0 m-0 border-none italic text-[14.7px] leading-[17.3px]" />
+                                                    <input value={cert.issuer} onChange={(e) => updateCertification(i, 'issuer', e.target.value)} className="w-full outline-none bg-transparent p-0 m-0 border-none italic text-[11pt] leading-[14pt]" />
                                                 </div>
                                             ))}
                                         </div>
@@ -903,23 +913,26 @@ export function Results({
                                 </div>
 
                                 {/* SHEET 2 (Physical Gap in Workspace) */}
-                                <div className="w-[816px] min-h-[1056px] bg-white text-black p-[75.6px] shadow-[0_0_60px_rgba(0,0,0,0.3)] flex flex-col relative text-[0] leading-none">
+                                <div className="w-[816px] min-h-[1056px] bg-white text-black p-[56.7pt] shadow-[0_0_60px_rgba(0,0,0,0.3)] flex flex-col relative text-[0] leading-none">
                                     {/* Achievements Section moved to Page 2 to match PDF Exactly */}
                                     {resumeData.achievements && resumeData.achievements.length > 0 && (
-                                        <div className="mb-[10.6px] text-[#1a1a1a]">
-                                            <h3 className="text-[16px] font-bold border-b-[0.67px] border-black mb-[18.6px] pb-[5.3px] leading-none">Achievements</h3>
-                                            <ul className="list-none ml-0 space-y-0">
-                                                {resumeData.achievements.map((ach, i) => (
-                                                    <li key={i} className="flex items-start mb-0">
-                                                        <span className="mr-[13.3px] text-[14.7px] leading-[17.3px] shrink-0">•</span>
-                                                        <textarea
-                                                            value={ach}
-                                                            onChange={(e) => updateAchievement(i, e.target.value)}
-                                                            className="w-full bg-transparent outline-none hide-scrollbar text-[14.7px] leading-[17.3px] p-0 m-0 border-none"
-                                                            rows={Math.max(1, Math.ceil(ach.length / 88))}
-                                                        />
-                                                    </li>
-                                                ))}
+                                        <div className="mb-[8pt] text-[#1a1a1a]">
+                                            <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Achievements</h3>
+                                            <ul className="list-none ml-0 space-y-0 text-[11pt] leading-[13pt]">
+                                                {resumeData.achievements.map((ach, i) => {
+                                                    if (!ach || !ach.trim()) return null;
+                                                    return (
+                                                        <li key={i} className="flex items-start mb-0">
+                                                            <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
+                                                            <textarea
+                                                                value={ach}
+                                                                onChange={(e) => updateAchievement(i, e.target.value.replace(/\n/g, ""))}
+                                                                className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
+                                                                rows={Math.max(1, Math.ceil(ach.trim().length / 90))}
+                                                            />
+                                                        </li>
+                                                    );
+                                                })}
                                             </ul>
                                         </div>
                                     )}
