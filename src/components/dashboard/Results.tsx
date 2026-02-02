@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, TrendingUp, Edit3, X, Save } from "lucide-react";
+import { CheckCircle, TrendingUp, Edit3, X, Save, Download, ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ResumeJSON } from "@/types/resume";
@@ -17,6 +17,29 @@ interface ResultsProps {
     matchedKeywords?: string[];
     isStandalone?: boolean;
 }
+
+const AutoResizeTextarea = ({ value, onChange, className, placeholder }: { value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, className?: string, placeholder?: string }) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [value]);
+
+    return (
+        <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={onChange}
+            className={className}
+            placeholder={placeholder}
+            rows={1}
+            style={{ overflow: 'hidden', resize: 'none' }}
+        />
+    );
+};
 
 export function Results({
     initialScore = 0,
@@ -640,15 +663,21 @@ export function Results({
                         className="fixed inset-0 z-[100] bg-[#8e949e] flex flex-col overflow-hidden"
                     >
                         {/* High-End Floating Toolbar */}
-                        <div className="fixed top-6 right-8 z-[110] flex gap-3">
+                        <div className="fixed top-6 right-8 z-[110] flex gap-3 items-center">
                             <Button
                                 variant="outline"
                                 onClick={() => isStandalone ? window.close() : setIsEditing(false)}
-                                className="bg-white border-black/10 text-black hover:bg-white/90 shadow-lg font-bold"
+                                className="h-11 px-6 rounded-full bg-white/90 backdrop-blur-md border border-zinc-200/50 text-zinc-700 hover:text-zinc-900 hover:bg-white hover:border-zinc-300 shadow-sm hover:shadow-md transition-all duration-300 font-medium text-[14px] flex items-center gap-2 group"
                             >
-                                {isStandalone ? "Finish & Exit" : "Close"}
+                                {isStandalone ? <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" /> : <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />}
+                                {isStandalone ? "Finish & Exit" : "Back"}
                             </Button>
-                            <Button onClick={handleSaveEdit} className="bg-black text-white hover:bg-black/90 px-10 shadow-2xl font-bold text-lg">
+
+                            <Button
+                                onClick={handleSaveEdit}
+                                className="h-11 px-8 rounded-full bg-zinc-900 hover:bg-black text-white shadow-xl shadow-zinc-900/20 hover:shadow-2xl hover:shadow-zinc-900/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 font-semibold text-[14px] flex items-center gap-2"
+                            >
+                                <Download className="w-4 h-4" />
                                 Download PDF
                             </Button>
                         </div>
@@ -725,11 +754,10 @@ export function Results({
                                     {resumeData.summary && (
                                         <div className="mb-[14pt] text-[#1a1a1a]">
                                             <h3 className="text-[12pt] font-bold border-b-[0.67px] border-black mb-[4pt] pb-[2pt] leading-none mt-[6pt]">Professional Summary</h3>
-                                            <textarea
+                                            <AutoResizeTextarea
                                                 value={resumeData.summary}
                                                 onChange={(e) => setResumeData(prev => ({ ...prev, summary: e.target.value }))}
                                                 className="w-full bg-transparent outline-none hide-scrollbar text-[11pt] leading-[14pt] p-0 m-0 border-none resize-none overflow-hidden"
-                                                rows={Math.max(1, Math.ceil(resumeData.summary.length / 90))}
                                             />
                                         </div>
                                     )}
@@ -758,15 +786,14 @@ export function Results({
                                                                 return (
                                                                     <li key={bi} className="flex items-start mb-0">
                                                                         <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
-                                                                        <textarea
+                                                                        <AutoResizeTextarea
                                                                             value={bullet}
                                                                             onChange={(e) => {
                                                                                 const newBullets = [...(edu.bullets || [])];
-                                                                                newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                                newBullets[bi] = e.target.value; // Allow newlines
                                                                                 updateEducation(i, 'bullets', newBullets);
                                                                             }}
                                                                             className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
-                                                                            rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
                                                                         />
                                                                     </li>
                                                                 );
@@ -802,15 +829,14 @@ export function Results({
                                                             return (
                                                                 <li key={bi} className="flex items-start mb-0">
                                                                     <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
-                                                                    <textarea
+                                                                    <AutoResizeTextarea
                                                                         value={bullet}
                                                                         onChange={(e) => {
                                                                             const newBullets = [...exp.bullets];
-                                                                            newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                            newBullets[bi] = e.target.value;
                                                                             updateExperience(i, 'bullets', newBullets);
                                                                         }}
                                                                         className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
-                                                                        rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
                                                                     />
                                                                 </li>
                                                             );
@@ -837,15 +863,14 @@ export function Results({
                                                             return (
                                                                 <li key={bi} className="flex items-start mb-0">
                                                                     <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
-                                                                    <textarea
+                                                                    <AutoResizeTextarea
                                                                         value={bullet}
                                                                         onChange={(e) => {
                                                                             const newBullets = [...project.bullets];
-                                                                            newBullets[bi] = e.target.value.replace(/\n/g, "");
+                                                                            newBullets[bi] = e.target.value;
                                                                             updateProject(i, 'bullets', newBullets);
                                                                         }}
                                                                         className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
-                                                                        rows={Math.max(1, Math.ceil(bullet.trim().length / 90))}
                                                                     />
                                                                 </li>
                                                             );
@@ -877,7 +902,7 @@ export function Results({
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <textarea
+                                                        <AutoResizeTextarea
                                                             value={cat.items.join(", ")}
                                                             onChange={(e) => {
                                                                 setResumeData(prev => {
@@ -887,7 +912,6 @@ export function Results({
                                                                 });
                                                             }}
                                                             className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none leading-[13pt] resize-none overflow-hidden"
-                                                            rows={Math.max(1, Math.ceil(cat.items.join(", ").length / 90))}
                                                         />
                                                     </div>
                                                 </div>
@@ -924,11 +948,10 @@ export function Results({
                                                     return (
                                                         <li key={i} className="flex items-start mb-0">
                                                             <span className="mr-[10pt] leading-[13pt] shrink-0">•</span>
-                                                            <textarea
+                                                            <AutoResizeTextarea
                                                                 value={ach}
-                                                                onChange={(e) => updateAchievement(i, e.target.value.replace(/\n/g, ""))}
+                                                                onChange={(e) => updateAchievement(i, e.target.value)}
                                                                 className="w-full bg-transparent outline-none hide-scrollbar p-0 m-0 border-none resize-none overflow-hidden leading-[13pt]"
-                                                                rows={Math.max(1, Math.ceil(ach.trim().length / 90))}
                                                             />
                                                         </li>
                                                     );
