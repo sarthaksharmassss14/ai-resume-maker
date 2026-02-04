@@ -59,36 +59,70 @@ export default function Home() {
     }, 3000);
 
     try {
+      // Step 1: Analyze (Parse + Initial Score)
       const formData = new FormData();
       formData.append('file', resumeFile);
       formData.append('jd', jdText);
 
-      const response = await fetch('/api/process', {
+      const analyzeResponse = await fetch('/api/process?mode=analyze', {
         method: 'POST',
         body: formData,
       });
 
-      let result;
-      const textResponse = await response.text();
+      let analyzeResult;
+      const analyzeText = await analyzeResponse.text();
       try {
-        result = JSON.parse(textResponse);
+        analyzeResult = JSON.parse(analyzeText);
       } catch (e) {
-        throw new Error(`Server returned invalid response: ${textResponse.slice(0, 100)}...`);
+        throw new Error(`Analysis failed: ${analyzeText.slice(0, 100)}...`);
       }
 
-      if (result.success) {
+      if (!analyzeResult.success) {
+        throw new Error(analyzeResult.error || "Analysis failed");
+      }
+
+      // Update progress for Step 2
+      setCurrentStageIndex(2); // Move to "Initial Validation" / "Optimization"
+
+      // Step 2: Optimize (Optimizer + Final Score)
+      const optimizeResponse = await fetch('/api/process?mode=optimize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeJson: analyzeResult.data.resumeData,
+          initialAtsData: {
+            score: analyzeResult.data.initialScore,
+            missing_keywords: analyzeResult.data.missingKeywords,
+            matched_keywords: analyzeResult.data.matchedKeywords,
+            weak_sections: []
+          },
+          rawJdText: jdText
+        }),
+      });
+
+      let optimizeResult;
+      const optimizeText = await optimizeResponse.text();
+      try {
+        optimizeResult = JSON.parse(optimizeText);
+      } catch (e) {
+        throw new Error(`Optimization failed: ${optimizeText.slice(0, 100)}...`);
+      }
+
+      if (optimizeResult.success) {
         clearInterval(progressInterval);
         setProgress(100);
         setCurrentStageIndex(STAGES.length - 1);
 
-        setResultsData(result.data);
+        setResultsData(optimizeResult.data); // Use final data
 
         setTimeout(() => {
           setIsProcessing(false);
           setShowResults(true);
         }, 1000);
       } else {
-        throw new Error(result.error || "Optimization failed");
+        throw new Error(optimizeResult.error || "Optimization failed");
       }
     } catch (error: unknown) {
       clearInterval(progressInterval);

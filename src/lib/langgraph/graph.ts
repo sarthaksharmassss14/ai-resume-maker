@@ -292,19 +292,29 @@ ${JSON.stringify(state.optimizedResumeJson)}`;
 };
 
 // --- Create Graph ---
-export const createResumeGraph = () => {
+// --- Create Graphs ---
+
+export const createAnalysisGraph = () => {
     const workflow = new StateGraph(StateAnnotation)
         .addNode("resume_parser", resumeParserNode)
-        .addNode("ats_scorer_before", atsScorerNode)
+        .addNode("ats_scorer_before", atsScorerNode);
+
+    workflow.addEdge(START, "resume_parser");
+    workflow.addEdge("resume_parser", "ats_scorer_before");
+    workflow.addEdge("ats_scorer_before", END);
+
+    return workflow.compile();
+};
+
+export const createOptimizationGraph = () => {
+    const workflow = new StateGraph(StateAnnotation)
         .addNode("resume_optimizer", resumeOptimizerNode)
         .addNode("ats_scorer_after", atsScorerNode)
         .addNode("rendercv_generator", rendercvGeneratorNode);
 
-    workflow.addEdge(START, "resume_parser");
-    workflow.addEdge("resume_parser", "ats_scorer_before");
-    workflow.addEdge("ats_scorer_before", "resume_optimizer");
+    workflow.addEdge(START, "resume_optimizer");
 
-    // Parallelize the final steps to save execution time
+    // Parallelize final steps
     workflow.addEdge("resume_optimizer", "ats_scorer_after");
     workflow.addEdge("resume_optimizer", "rendercv_generator");
     workflow.addEdge("ats_scorer_after", END);
@@ -312,3 +322,6 @@ export const createResumeGraph = () => {
 
     return workflow.compile();
 };
+
+// Deprecated: kept to avoid immediate compilation errors until route is updated
+export const createResumeGraph = createAnalysisGraph;
