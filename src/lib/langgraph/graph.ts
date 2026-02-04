@@ -1,7 +1,6 @@
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 import { ChatGroq } from "@langchain/groq";
 import { ResumeJSON } from "@/types/resume";
-import { dump } from "js-yaml";
 
 export interface AgentState {
     rawResumeText: string;
@@ -303,84 +302,25 @@ ${JSON.stringify(state.resumeJson)}`;
 };
 
 // --- STEP 6: RenderCV Generator ---
-// --- STEP 6: RenderCV Generator (Deterministic - No LLM) ---
 const rendercvGeneratorNode = async (state: typeof StateAnnotation.State) => {
-    // Skip LLM entirely. Convert JSON to YAML deterministically instantly.
-    const resume = state.optimizedResumeJson || state.resumeJson;
-    if (!resume) return { rendercvYaml: "" };
+    const model = getModel("llama-3.1-8b-instant", 0);
+    const prompt = `You convert structured resume JSON into RenderCV YAML.
+Rules:
+- Output ONLY YAML
+- No markdown, No comments, No explanations
+- Follow RenderCV structure
+- Omit missing fields
 
-    const cvData: any = {
-        cv: {
-            name: resume.personal.name,
-            location: resume.personal.location || "",
-            email: resume.personal.email || "",
-            phone: resume.personal.phone || "",
-            social_networks: resume.personal.links?.map(l => ({
-                network: l.label,
-                username: l.url
-            })) || [],
-            sections: {}
-        }
-    };
+Input ResumeJSON:
+${JSON.stringify(state.optimizedResumeJson)}`;
 
-    // Summary
-    if (resume.summary) {
-        cvData.cv.sections.summary = [resume.summary];
+    const response = await model.invoke(prompt);
+    let yamlStr = response.content.toString();
+    const yamlMatch = yamlStr.match(/```yaml\s*([\s\S]*?)\s*```/) || yamlStr.match(/```\s*([\s\S]*?)\s*```/);
+    if (yamlMatch) {
+        yamlStr = yamlMatch[1];
     }
-
-    // Education
-    if (resume.education && resume.education.length > 0) {
-        cvData.cv.sections.education = resume.education.map(edu => ({
-            institution: edu.institution,
-            area: edu.degree,
-            date: (edu.startDate && edu.endDate) ? `${edu.startDate} – ${edu.endDate}` : (edu.startDate || "Present"),
-            highlights: edu.bullets || []
-        }));
-    }
-
-    // Experience
-    if (resume.experience && resume.experience.length > 0) {
-        cvData.cv.sections.experience = resume.experience.map(exp => ({
-            company: exp.company,
-            position: exp.role,
-            location: exp.location || "",
-            date: (exp.startDate && exp.endDate) ? `${exp.startDate} – ${exp.endDate}` : (exp.startDate || "Present"),
-            highlights: exp.bullets || []
-        }));
-    }
-
-    // Projects
-    if (resume.projects && resume.projects.length > 0) {
-        cvData.cv.sections.projects = resume.projects.map(proj => ({
-            name: proj.name,
-            date: " ", // RenderCV sometimes expects key presence
-            highlights: proj.bullets || []
-        }));
-    }
-
-    // Skills
-    if (resume.skills && resume.skills.length > 0) {
-        cvData.cv.sections.skills = resume.skills.map(skill => ({
-            label: skill.category,
-            details: skill.items.join(", ")
-        }));
-    }
-
-    // Certifications (Optional - Map to 'certifications' or generic custom section)
-    if (resume.certifications && resume.certifications.length > 0) {
-        cvData.cv.sections.certifications = resume.certifications.map(cert => ({
-            name: cert.name,
-            date: cert.date || "",
-        }));
-    }
-
-    try {
-        const yamlStr = dump(cvData);
-        return { rendercvYaml: yamlStr };
-    } catch (e) {
-        console.error("YAML dump error", e);
-        return { rendercvYaml: "" };
-    }
+    return { rendercvYaml: yamlStr };
 };
 
 // --- Create Graph ---
