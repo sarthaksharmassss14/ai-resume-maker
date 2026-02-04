@@ -43,10 +43,10 @@ export async function extractTextWithLinks(buffer: Buffer): Promise<string> {
             if (annotations && annotations.length > 0) {
                 const links = annotations
                     .filter((a: any) => a.subtype === 'Link' && a.url)
-                    .map((a: any) => \`[Link: \${a.url}]\`);
-                
+                    .map((a: any) => `[Link: ${a.url}]`);
+
                 if (links.length > 0) {
-                    pageText += "\\n\\n--- Links on this page ---\\n" + links.join("\\n") + "\\n------------------------\\n";
+                    pageText += "\n\n--- Links on this page ---\n" + links.join("\n") + "\n------------------------\n";
                 }
             }
 
@@ -59,9 +59,9 @@ export async function extractTextWithLinks(buffer: Buffer): Promise<string> {
         console.error("PDFJS Parse Error:", error);
         // Fallback to basic text extraction if PDFJS fails (e.g. some complex PDFs)
         try {
-             const pdfParse = require('pdf-parse');
-             const data = await pdfParse(buffer);
-             return data.text + "\\n\\n(Note: Deep link extraction failed, only visible text available)";
+            const pdfParse = require('pdf-parse');
+            const data = await pdfParse(buffer);
+            return data.text + "\\n\\n(Note: Deep link extraction failed, only visible text available)";
         } catch (e) {
             throw new Error("Failed to parse PDF file");
         }
