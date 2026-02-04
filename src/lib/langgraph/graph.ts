@@ -134,7 +134,21 @@ ${state.rawResumeText}`;
 
         parsed.education = trueEducation;
         if (movedProjects.length > 0) {
-            parsed.projects = [...(parsed.projects || []), ...movedProjects];
+            const existingProjects = parsed.projects || [];
+            const uniqueMoved = movedProjects.filter(mp => {
+                // Check for duplicates in existing projects
+                const isDuplicate = existingProjects.some((ep: any) => {
+                    // 1. Same Name (approximate)
+                    if (ep.name.toLowerCase().includes(mp.name.toLowerCase()) || mp.name.toLowerCase().includes(ep.name.toLowerCase())) return true;
+                    // 2. Identical First Bullet (Content Match)
+                    if (ep.bullets && mp.bullets && ep.bullets.length > 0 && mp.bullets.length > 0) {
+                        if (ep.bullets[0] === mp.bullets[0]) return true;
+                    }
+                    return false;
+                });
+                return !isDuplicate;
+            });
+            parsed.projects = [...existingProjects, ...uniqueMoved];
         }
     }
 
