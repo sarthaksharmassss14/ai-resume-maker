@@ -47,7 +47,7 @@ const StateAnnotation = Annotation.Root({
 
 // Initialize LLM (Groq)
 // Initialize LLM (Groq)
-const getModel = (modelName: string = "llama-3.3-70b-versatile", temperature = 0) => new ChatGroq({
+const getModel = (modelName: string = "llama-3.1-8b-instant", temperature = 0) => new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
     model: modelName,
     temperature,
@@ -238,7 +238,8 @@ ${state.rawJdText}`;
 const resumeOptimizerNode = async (state: typeof StateAnnotation.State) => {
     if (!state.resumeJson) return { optimizedResumeJson: state.resumeJson };
 
-    const model = getModel("llama-3.3-70b-versatile", 0.1); // Lower temp for strict factual adherence
+    // Use 8b model for Optimizer as well to prevent Vercel Timeout
+    const model = getModel("llama-3.1-8b-instant", 0.1);
     const keywords = state.initialAtsData?.missing_keywords.join(", ") || "";
     const weakSections = state.initialAtsData?.weak_sections.join(", ") || "";
 
