@@ -70,9 +70,10 @@ Rules:
   - If an item describes building a system (e.g., "Library Management System", "University Portal"), it is a **PROJECT**, even if it contains the word "University" or "College".
   - Only list actual Degree programs under Education.
 - Preserve the exact names of Institutions (Colleges/Universities) and Companies as they appear in the text.
-- The Resume Text contains embedded links in the format "[Link: URL]" right next to the text they belong to.
-  - Example: "My Project [Link: https://github.com/me]" -> name: "My Project", link: "https://github.com/me"
-  - Map these URLs to the 'link' or 'url' fields of the corresponding item.
+- **NO HALLUCINATED LINKS**: You must **ONLY** extract URLs that are **EXPLICITLY VISIBLE** in the text (starting with \`http\`, \`https\`, or \`www\`).
+  - **NEVER** invent a GitHub URL like \`github.com/username/project\` if it is not in the text.
+  - If a project mentions "Source Code" or "GitHub" but the actual URL text is missing, leave the \`link\` field empty.
+  - **VERIFY**: If the extracted URL is not in the input text exactly, **DISCARD IT**.
 
 Schema:
 {
