@@ -277,6 +277,7 @@ STRICT CONSTRAINTS:
    - **Skills Section**: Reorder the \`skills\` array so that the 5-7 most JD-relevant skills (including target keywords) appear at the VERY START.
    - **Project Weighting**: Reorder the \`projects\` array to place the project that most closely matches the JD/Role at the top.
 8. **Keyword Frequency**: For the top keywords (${keywords}), mention them in the Summary AND in at least one existing Experience or Project bullet point by adding them to the description alongside existing tech.
+9. **CORRECTION**: If you identify a **PROJECT** (e.g. "University Chatbot", "Library System") incorrectly listed inside the **EDUCATION** section, **MOVE** it to the \`projects\` array. Do NOT leave projects inside Education.
 
 Input ResumeJSON:
 ${JSON.stringify(state.resumeJson)}`;
