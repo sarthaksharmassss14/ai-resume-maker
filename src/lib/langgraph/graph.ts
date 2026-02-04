@@ -55,7 +55,9 @@ const getModel = (modelName: string = "llama-3.3-70b-versatile", temperature = 0
 
 // --- STEP 2: Resume Parser Agent ---
 const resumeParserNode = async (state: typeof StateAnnotation.State) => {
-    const model = getModel();
+    // START CHANGE: Use 8b model for parsing to prevent timeout. 70b is too slow for Vercel.
+    const model = getModel("llama-3.1-8b-instant", 0);
+    // END CHANGE
     // Links are now embedded in state.rawResumeText as [Link: url]
 
     const prompt = `You extract resume content into structured JSON.
