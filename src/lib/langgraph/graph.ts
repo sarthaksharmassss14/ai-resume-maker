@@ -47,9 +47,9 @@ const StateAnnotation = Annotation.Root({
 
 // Initialize LLM (Groq)
 // Initialize LLM (Groq)
-const getModel = (temperature = 0) => new ChatGroq({
+const getModel = (modelName: string = "llama-3.3-70b-versatile", temperature = 0) => new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
-    model: "llama-3.3-70b-versatile",
+    model: modelName,
     temperature,
 });
 
@@ -105,7 +105,13 @@ ${state.rawResumeText}`;
 // --- STEP 3: ATS Scorer (Analysis only) ---
 const atsScorerNode = async (state: typeof StateAnnotation.State) => {
     const currentResume = state.optimizedResumeJson || state.resumeJson;
-    const model = getModel(0); // Set to 0 for deterministic, consistent scoring
+    const isFinalPass = !!state.optimizedResumeJson;
+
+    // START CHANGE: Use 8b model for FINAL pass to verify speed, 70b for INITIAL to ensure depth
+    const model = isFinalPass
+        ? getModel("llama-3.1-8b-instant", 0)
+        : getModel("llama-3.3-70b-versatile", 0);
+    // END CHANGE
 
     // SKIP SCORING on the final pass to save Vercel Execution Time (60s limit).
     // We trust that the optimizer did its job, so we return a heuristic boosted score.
@@ -232,7 +238,7 @@ ${state.rawJdText}`;
 const resumeOptimizerNode = async (state: typeof StateAnnotation.State) => {
     if (!state.resumeJson) return { optimizedResumeJson: state.resumeJson };
 
-    const model = getModel(0.1); // Lower temp for strict factual adherence
+    const model = getModel("llama-3.3-70b-versatile", 0.1); // Lower temp for strict factual adherence
     const keywords = state.initialAtsData?.missing_keywords.join(", ") || "";
     const weakSections = state.initialAtsData?.weak_sections.join(", ") || "";
 
@@ -296,7 +302,7 @@ ${JSON.stringify(state.resumeJson)}`;
 
 // --- STEP 6: RenderCV Generator ---
 const rendercvGeneratorNode = async (state: typeof StateAnnotation.State) => {
-    const model = getModel();
+    const model = getModel("llama-3.1-8b-instant", 0);
     const prompt = `You convert structured resume JSON into RenderCV YAML.
 Rules:
 - Output ONLY YAML
