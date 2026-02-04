@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createResumeGraph, AgentState } from '@/lib/langgraph/graph';
 import { supabase } from '@/lib/supabase/client';
-import { PDFParse } from 'pdf-parse';
+
 import { extractLinksFromPdfBuffer, extractTextWithLinks } from '@/lib/pdf-utils';
 
 export const maxDuration = 60; // Increase Vercel timeout to 60 seconds
