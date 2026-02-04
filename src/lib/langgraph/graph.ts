@@ -304,14 +304,8 @@ ${JSON.stringify(state.resumeJson)}`;
 // --- STEP 6: RenderCV Generator ---
 const rendercvGeneratorNode = async (state: typeof StateAnnotation.State) => {
     const model = getModel("llama-3.1-8b-instant", 0);
-    const prompt = `You convert structured resume JSON into RenderCV YAML.
-Rules:
-- Output ONLY YAML
-- No markdown, No comments, No explanations
-- Follow RenderCV structure
-- Omit missing fields
-
-Input ResumeJSON:
+    const prompt = `Convert this JSON to RenderCV YAML. ONE RULE: Output ONLY valid YAML. No text.
+    Input:
 ${JSON.stringify(state.optimizedResumeJson)}`;
 
     const response = await model.invoke(prompt);
