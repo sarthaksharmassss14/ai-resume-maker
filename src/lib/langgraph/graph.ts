@@ -109,7 +109,7 @@ const atsScorerNode = async (state: typeof StateAnnotation.State) => {
 
     // SKIP SCORING on the final pass to save Vercel Execution Time (60s limit).
     // We trust that the optimizer did its job, so we return a heuristic boosted score.
-    if (state.optimizedResumeJson) {
+    if (false && state.optimizedResumeJson) {
         // Boost score by 25 points, capped at 98, min 85
         const initialScore = state.initialAtsData?.score || 60;
         const finalScore = Math.min(Math.max(initialScore + 25, 88), 98);
