@@ -66,6 +66,9 @@ Rules:
 - Follow the provided schema exactly
 - Do not infer fake experience
 - If something is unclear, omit it. Do NOT use placeholders like "University", "Company", or "Location" if the specific name is missing; instead, keep the raw text as is or omit the field.
+- **CRITICAL DISTINCTION**: Differentiate strictly between EDUCATION (Colleges, Degrees) and PROJECTS (Apps, Websites, Tools). 
+  - If an item describes building a system (e.g., "Library Management System", "University Portal"), it is a **PROJECT**, even if it contains the word "University" or "College".
+  - Only list actual Degree programs under Education.
 - Preserve the exact names of Institutions (Colleges/Universities) and Companies as they appear in the text.
 - The Resume Text contains embedded links in the format "[Link: URL]" right next to the text they belong to.
   - Example: "My Project [Link: https://github.com/me]" -> name: "My Project", link: "https://github.com/me"
@@ -324,7 +327,6 @@ ${JSON.stringify(state.optimizedResumeJson)}`;
 };
 
 // --- Create Graph ---
-// --- Create Graphs ---
 
 export const createAnalysisGraph = () => {
     const workflow = new StateGraph(StateAnnotation)
