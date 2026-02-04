@@ -104,7 +104,40 @@ ${state.rawResumeText}`;
             throw new Error("Resume Parser failed to generate valid JSON. Response: " + jsonStr.substring(0, 50));
         }
     }
-    return { resumeJson: JSON.parse(jsonStr) };
+    let parsed = JSON.parse(jsonStr);
+
+    // FIX: 8b model often puts Projects (e.g. "University Portal") into Education. 
+    // Deterministic fix to move them back.
+    if (parsed.education && Array.isArray(parsed.education)) {
+        const trueEducation: any[] = [];
+        const movedProjects: any[] = [];
+
+        for (const edu of parsed.education) {
+            const str = JSON.stringify(edu).toLowerCase();
+            // Heuristics: Projects have "tech stack", "technologies", or build verbs without degree names
+            const isProject = str.includes("tech stack") ||
+                str.includes("technologies used") ||
+                (str.includes("developed") && !str.includes("degree") && !str.includes("bachelor") && !str.includes("master") && !str.includes("b.tech") && !str.includes("b.e."));
+
+            if (isProject) {
+                console.log("Moving misclassified project from Education:", edu.institution);
+                movedProjects.push({
+                    name: edu.institution,
+                    link: "",
+                    bullets: edu.bullets || []
+                });
+            } else {
+                trueEducation.push(edu);
+            }
+        }
+
+        parsed.education = trueEducation;
+        if (movedProjects.length > 0) {
+            parsed.projects = [...(parsed.projects || []), ...movedProjects];
+        }
+    }
+
+    return { resumeJson: parsed };
 };
 
 // --- STEP 3: ATS Scorer (Analysis only) ---
