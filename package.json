@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-
     "@langchain/community": "^1.1.10",
     "@langchain/core": "^1.1.18",
     "@langchain/groq": "^1.0.4",
@@ -31,6 +30,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
