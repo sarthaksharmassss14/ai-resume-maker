@@ -674,7 +674,7 @@ export function Results({
                             </Button>
 
                             <Button
-                                onClick={handleSaveEdit}
+                                onClick={downloadPdf}
                                 className="h-11 px-8 rounded-full bg-zinc-900 hover:bg-black text-white shadow-xl shadow-zinc-900/20 hover:shadow-2xl hover:shadow-zinc-900/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 font-semibold text-[14px] flex items-center gap-2"
                             >
                                 <Download className="w-4 h-4" />

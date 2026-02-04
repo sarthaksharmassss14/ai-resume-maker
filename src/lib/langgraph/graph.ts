@@ -235,7 +235,7 @@ STRICT CONSTRAINTS:
    - **Implicit Skill Resolution**: If user has React, Node, Express, and Mongo, consider "MERN" as a MATCHED skill.
    - **Functional Translation**: Map specific tools to high-level JD descriptions (e.g., Node/Express -> "Robust backend logic", React -> "Responsive UIs").
 7. **FUNCTIONAL MIRRORING & BRIDGING**: Rewrite existing bullet points to mirror the JD's functional requirements and bridge implementation:
-   - Append the JD's phrasing to existing bullets. Example: "Developed a Full-stack application with RESTful APIs using Node.js and Express.js."
+   - Append the J D's phrasing to existing bullets. Example: "Developed a Full-stack application with RESTful APIs using Node.js and Express.js."
    - If JD asks for "Build reusable code" and user wrote "Wrote a React component", rewrite as "Developed a library of reusable components to improve engineering efficiency."
    - Focus on the *impact* and *intent* described in the JD.
 8. **STRATEGIC REORDERING**: Maximize ATS "High-Value" zones (top third):

@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agentic AI-Powered Resume Optimizer
 
-## Getting Started
 
-First, run the development server:
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Agentic Resume** is a next-generation resume optimization tool powered by advanced AI agents. It goes beyond simple keyword matching by using a multi-agent orchestration system to deeply understand your resume and the job description (JD), rewriting your content to maximize ATS visibility and human readability.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **📄 Smart PDF Parsing**: Accurately extracts text, links, and structure from your existing resume.
+- **🤖 Multi-Agent Optimization**: Uses specialized AI agents to analyze, score, and rewrite your resume.
+- **🎯 Intelligent ATS Scoring**: Implements a Weighted Heuristic Match (WHM) algorithm to evaluate keyword depth, skill coverage, and experience relevance.
+- **✍️ Context-Aware Rewriting**: Automatically enhances bullet points with impact metrics and stronger action verbs tailored to the JD.
+- **📊 Real-time Feedback**: Streaming progress updates as the agents work on your resume.
+- **🏗️ RenderCV Compatible**: Generates YAML output compatible with RenderCV for high-quality PDF generation.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Technical Architecture
 
-## Learn More
+The core of the application relies on **LangGraph** to coordinate a Directed Acyclic Graph (DAG) of specialized agents:
 
-To learn more about Next.js, take a look at the following resources:
+| Agent | Role |
+|-------|------|
+| **ParserAgent** | Extracts entities and structure from raw PDF text. |
+| **AnalyzerAgent** | Breaks down the Job Description into weighted skill clusters. |
+| **ScorerAgent** | Calculates ATS scores based on keyword vectors, skill coverage, and experience relevance. |
+| **OptimizerAgent** | Rewrites experience bullets to align with the JD's requirements. |
+| **YAMLGenAgent** | Formats the final curated content into a structured YAML for PDF generation. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Scoring Logic (WHM)
+Our ATS scorer evaluates resumes on four key dimensions:
+1. **Keyword Vector Match (40%)**: Jaccard similarity with semantic understanding.
+2. **Skill Coverage (30%)**: Matches against hard and soft skills.
+3. **Experience Relevance (20%)**: Weighted by recency and role relevance.
+4. **Quantification & Impact (10%)**: Checks for measurable metrics (%, $, numbers).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 💻 Tech Stack
 
-## Deploy on Vercel
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **AI Orchestration**: [LangGraph](https://langchain-ai.github.io/langgraphjs/) & [LangChain](https://js.langchain.com/)
+- **LLM Provider**: [Groq](https://groq.com/) (Llama 3 models)
+- **Database**: [Supabase](https://supabase.com/) (for storing optimization history)
+- **Styling**: [TailwindCSS v4](https://tailwindcss.com/)
+- **PDF Processing**: `pdf-parse`, `jspdf`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏁 Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prerequisites
+- Node.js 20+ installed.
+- Supabase account and project.
+- Groq API Key.
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/resumemaker.git
+   cd resumemaker
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables**
+   Create a `.env.local` file in the root directory:
+   ```env
+   # LLM Provider
+   GROQ_API_KEY=your_groq_api_key_here
+
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # Optional: OpenAI (if used as fallback)
+   OPENAI_API_KEY=your_openai_key
+   ```
+
+4. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the App**
+   Visit [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
