@@ -129,7 +129,7 @@ const atsScorerNode = async (state: typeof StateAnnotation.State) => {
         };
     }
 
-    const isFinalPass = !!state.optimizedResumeJson;
+
     const initialScore = state.initialAtsData?.score || 0;
     const previousMissing = state.initialAtsData?.missing_keywords.join(", ") || "None";
 
