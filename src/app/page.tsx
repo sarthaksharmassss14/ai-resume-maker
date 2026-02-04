@@ -68,7 +68,13 @@ export default function Home() {
         body: formData,
       });
 
-      const result = await response.json();
+      let result;
+      const textResponse = await response.text();
+      try {
+        result = JSON.parse(textResponse);
+      } catch (e) {
+        throw new Error(`Server returned invalid response: ${textResponse.slice(0, 100)}...`);
+      }
 
       if (result.success) {
         clearInterval(progressInterval);
