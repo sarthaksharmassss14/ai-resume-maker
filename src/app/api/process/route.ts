@@ -6,7 +6,13 @@ import { extractLinksFromPdfBuffer, extractTextWithLinks } from '@/lib/pdf-utils
 
 export const maxDuration = 60; // Increase Vercel timeout to 60 seconds
 
+
+export async function GET() {
+    return NextResponse.json({ status: "alive", message: "API is ready" });
+}
+
 export async function POST(req: Request) {
+    console.log("Processing POST request...");
     try {
         const formData = await req.formData();
         const file = formData.get('file') as File;
