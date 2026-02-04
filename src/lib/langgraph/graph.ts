@@ -303,8 +303,11 @@ export const createResumeGraph = () => {
     workflow.addEdge(START, "resume_parser");
     workflow.addEdge("resume_parser", "ats_scorer_before");
     workflow.addEdge("ats_scorer_before", "resume_optimizer");
+
+    // Parallelize the final steps to save execution time
     workflow.addEdge("resume_optimizer", "ats_scorer_after");
-    workflow.addEdge("ats_scorer_after", "rendercv_generator");
+    workflow.addEdge("resume_optimizer", "rendercv_generator");
+    workflow.addEdge("ats_scorer_after", END);
     workflow.addEdge("rendercv_generator", END);
 
     return workflow.compile();
