@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase/client';
 import { PDFParse } from 'pdf-parse';
 import { extractLinksFromPdfBuffer, extractTextWithLinks } from '@/lib/pdf-utils';
 
+export const maxDuration = 60; // Increase Vercel timeout to 60 seconds
+
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
