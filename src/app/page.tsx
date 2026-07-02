@@ -46,86 +46,168 @@ export default function Home() {
     setIsProcessing(true);
     setShowResults(false);
     setCurrentStageIndex(0);
-    setProgress(0);
-
-    // Start UI Progress Simulation
-    let stage = 0;
-    const progressInterval = setInterval(() => {
-      if (stage < STAGES.length - 1) {
-        stage++;
-        setCurrentStageIndex(stage);
-        setProgress((stage / STAGES.length) * 100);
-      }
-    }, 3000);
+    setProgress(5);
 
     try {
-      // Step 1: Analyze (Parse + Initial Score)
+      // --- STAGE 0: Parsing Resume ---
       const formData = new FormData();
       formData.append('file', resumeFile);
-      formData.append('jd', jdText);
 
-      const analyzeResponse = await fetch('/api/process?mode=analyze', {
+      const parseResponse = await fetch('/api/process?mode=parse', {
         method: 'POST',
         body: formData,
       });
 
-      let analyzeResult;
-      const analyzeText = await analyzeResponse.text();
-      try {
-        analyzeResult = JSON.parse(analyzeText);
-      } catch (e) {
-        throw new Error(`Analysis failed: ${analyzeText.slice(0, 100)}...`);
+      if (!parseResponse.ok) {
+        throw new Error(`Resume parsing failed with status ${parseResponse.status}`);
       }
 
-      if (!analyzeResult.success) {
-        throw new Error(analyzeResult.error || "Analysis failed");
+      const parseResult = await parseResponse.json();
+      if (!parseResult.success) {
+        throw new Error(parseResult.error || "Resume parsing failed");
       }
 
-      // Update progress for Step 2
-      setCurrentStageIndex(2); // Move to "Initial Validation" / "Optimization"
+      const resumeData = parseResult.data.resumeData;
 
-      // Step 2: Optimize (Optimizer + Final Score)
+      // --- STAGE 1: Initial Scoring ---
+      setCurrentStageIndex(1);
+      setProgress(20);
+
+      const scoreResponse = await fetch('/api/process?mode=score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeJson: resumeData, jdText }),
+      });
+
+      if (!scoreResponse.ok) {
+        throw new Error(`Scoring failed with status ${scoreResponse.status}`);
+      }
+
+      const scoreResult = await scoreResponse.json();
+      if (!scoreResult.success) {
+        throw new Error(scoreResult.error || "Scoring failed");
+      }
+
+      const initialAtsData = scoreResult.data.atsData;
+
+      // --- STAGE 2: Initial Validation ---
+      setCurrentStageIndex(2);
+      setProgress(40);
+      // Wait a brief moment to let user visualize validation phase
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // --- STAGE 3: Agentic Optimization ---
+      setCurrentStageIndex(3);
+      setProgress(50);
+
       const optimizeResponse = await fetch('/api/process?mode=optimize', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          resumeJson: analyzeResult.data.resumeData,
-          initialAtsData: {
-            score: analyzeResult.data.initialScore,
-            missing_keywords: analyzeResult.data.missingKeywords,
-            matched_keywords: analyzeResult.data.matchedKeywords,
-            weak_sections: []
-          },
-          rawJdText: jdText
+          resumeJson: resumeData,
+          initialAtsData,
+          rawJdText: jdText,
         }),
       });
 
-      let optimizeResult;
-      const optimizeText = await optimizeResponse.text();
-      try {
-        optimizeResult = JSON.parse(optimizeText);
-      } catch (e) {
-        throw new Error(`Optimization failed: ${optimizeText.slice(0, 100)}...`);
+      if (!optimizeResponse.ok) {
+        throw new Error(`Optimization failed with status ${optimizeResponse.status}`);
       }
 
-      if (optimizeResult.success) {
-        clearInterval(progressInterval);
-        setProgress(100);
-        setCurrentStageIndex(STAGES.length - 1);
-
-        setResultsData(optimizeResult.data); // Use final data
-
-        setTimeout(() => {
-          setIsProcessing(false);
-          setShowResults(true);
-        }, 1000);
-      } else {
+      const optimizeResult = await optimizeResponse.json();
+      if (!optimizeResult.success) {
         throw new Error(optimizeResult.error || "Optimization failed");
       }
+
+      const optimizedResumeJson = optimizeResult.data.optimizedResumeJson;
+
+      // --- STAGE 4: Final Validation ---
+      setCurrentStageIndex(4);
+      setProgress(70);
+
+      const finalScoreResponse = await fetch('/api/process?mode=score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resumeJson: resumeData,
+          optimizedResumeJson,
+          initialAtsData,
+          jdText,
+        }),
+      });
+
+      if (!finalScoreResponse.ok) {
+        throw new Error(`Final scoring failed with status ${finalScoreResponse.status}`);
+      }
+
+      const finalScoreResult = await finalScoreResponse.json();
+      if (!finalScoreResult.success) {
+        throw new Error(finalScoreResult.error || "Final scoring failed");
+      }
+
+      const finalAtsData = finalScoreResult.data.atsData;
+
+      // --- STAGE 5: Generating RenderCV ---
+      setCurrentStageIndex(5);
+      setProgress(85);
+
+      const yamlResponse = await fetch('/api/process?mode=yaml', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ optimizedResumeJson }),
+      });
+
+      if (!yamlResponse.ok) {
+        throw new Error(`YAML generation failed with status ${yamlResponse.status}`);
+      }
+
+      const yamlResult = await yamlResponse.json();
+      if (!yamlResult.success) {
+        throw new Error(yamlResult.error || "YAML generation failed");
+      }
+
+      const yaml = yamlResult.data.yaml;
+
+      // --- STAGE 6: Store in Supabase ---
+      setProgress(95);
+      try {
+        await fetch('/api/process?mode=store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            initialScore: initialAtsData.score,
+            finalScore: finalAtsData.score,
+            candidateName: resumeData?.personal?.name || 'Unknown',
+            missingKeywords: initialAtsData.missing_keywords,
+            jdText,
+          }),
+        });
+      } catch (dbError) {
+        console.error("Non-blocking DB insert error:", dbError);
+      }
+
+      // Finish Processing
+      setProgress(100);
+      setResultsData({
+        initialScore: initialAtsData.score,
+        finalScore: finalAtsData.score,
+        resumeData: optimizedResumeJson,
+        yaml,
+        missingKeywords: initialAtsData.missing_keywords,
+        matchedKeywords: initialAtsData.matched_keywords,
+        improvements: [
+          "Optimized keyword density",
+          "Rewrote bullets for impact",
+          "Formatted for RenderCV",
+        ],
+      });
+
+      setTimeout(() => {
+        setIsProcessing(false);
+        setShowResults(true);
+      }, 1000);
+
     } catch (error: unknown) {
-      clearInterval(progressInterval);
       setIsProcessing(false);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       alert(errorMessage);

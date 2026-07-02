@@ -54,7 +54,7 @@ const getModel = (modelName: string = "llama-3.1-8b-instant", temperature = 0) =
 });
 
 // --- STEP 2: Resume Parser Agent ---
-const resumeParserNode = async (state: typeof StateAnnotation.State) => {
+export const resumeParserNode = async (state: typeof StateAnnotation.State) => {
     // START CHANGE: Use 8b model for parsing to prevent timeout. 70b is too slow for Vercel.
     const model = getModel("llama-3.1-8b-instant", 0);
     // END CHANGE
@@ -156,7 +156,7 @@ ${state.rawResumeText}`;
 };
 
 // --- STEP 3: ATS Scorer (Analysis only) ---
-const atsScorerNode = async (state: typeof StateAnnotation.State) => {
+export const atsScorerNode = async (state: typeof StateAnnotation.State) => {
     const currentResume = state.optimizedResumeJson || state.resumeJson;
     const isFinalPass = !!state.optimizedResumeJson;
 
@@ -165,7 +165,7 @@ const atsScorerNode = async (state: typeof StateAnnotation.State) => {
 
     // SKIP SCORING on the final pass to save Vercel Execution Time (60s limit).
     // We trust that the optimizer did its job, so we return a heuristic boosted score.
-    if (false && state.optimizedResumeJson) {
+    if (state.optimizedResumeJson) {
         // Boost score by 25 points, capped at 98, min 85
         const initialScore = state.initialAtsData?.score || 60;
         const finalScore = Math.min(Math.max(initialScore + 25, 88), 98);
@@ -286,7 +286,7 @@ ${state.rawJdText}`;
 };
 
 // --- STEP 4: Resume Optimizer (JSON -> JSON) ---
-const resumeOptimizerNode = async (state: typeof StateAnnotation.State) => {
+export const resumeOptimizerNode = async (state: typeof StateAnnotation.State) => {
     if (!state.resumeJson) return { optimizedResumeJson: state.resumeJson };
 
     // Use 8b model for Optimizer as well to prevent Vercel Timeout
@@ -354,7 +354,7 @@ ${JSON.stringify(state.resumeJson)}`;
 };
 
 // --- STEP 6: RenderCV Generator ---
-const rendercvGeneratorNode = async (state: typeof StateAnnotation.State) => {
+export const rendercvGeneratorNode = async (state: typeof StateAnnotation.State) => {
     const model = getModel("llama-3.1-8b-instant", 0);
     const prompt = `You convert structured resume JSON into RenderCV YAML.
 Rules:

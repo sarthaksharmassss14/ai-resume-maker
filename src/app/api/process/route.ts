@@ -1,42 +1,40 @@
 import { NextResponse } from 'next/server';
-import { createAnalysisGraph, createOptimizationGraph, AgentState } from '@/lib/langgraph/graph';
+import { 
+    resumeParserNode, 
+    atsScorerNode, 
+    resumeOptimizerNode, 
+    rendercvGeneratorNode 
+} from '@/lib/langgraph/graph';
 import { supabase } from '@/lib/supabase/client';
+import { extractTextWithLinks } from '@/lib/pdf-utils';
 
-import { extractLinksFromPdfBuffer, extractTextWithLinks } from '@/lib/pdf-utils';
-
-export const maxDuration = 60; // Increase Vercel timeout to 60 seconds
-
-
-
+export const maxDuration = 60; // Configured for Vercel
 
 export async function GET() {
     return NextResponse.json({ status: "alive", message: "API is ready" });
 }
 
-
 export async function POST(req: Request) {
     console.log("Processing request...");
     try {
         const url = new URL(req.url);
-        const mode = url.searchParams.get('mode') || 'analyze'; // 'analyze' or 'optimize'
+        const mode = url.searchParams.get('mode') || 'parse';
 
-        if (mode === 'analyze') {
+        if (mode === 'parse') {
             const formData = await req.formData();
             const file = formData.get('file') as File;
-            const jdText = formData.get('jd') as string;
 
-            if (!file || !jdText) {
-                return NextResponse.json({ success: false, error: "Missing file or JD" }, { status: 400 });
+            if (!file) {
+                return NextResponse.json({ success: false, error: "Missing file" }, { status: 400 });
             }
 
             // Parse PDF
             const buffer = Buffer.from(await file.arrayBuffer());
             const resumeText = await extractTextWithLinks(buffer);
 
-            const graph = createAnalysisGraph();
-            const initialState: AgentState = {
+            const state: any = {
                 rawResumeText: resumeText,
-                rawJdText: jdText,
+                rawJdText: '',
                 detectedLinks: [],
                 resumeJson: null,
                 initialAtsData: null,
@@ -45,16 +43,42 @@ export async function POST(req: Request) {
                 rendercvYaml: '',
             };
 
-            const result = (await graph.invoke(initialState)) as AgentState;
+            const result = await resumeParserNode(state);
 
             return NextResponse.json({
                 success: true,
                 data: {
-                    initialScore: result.initialAtsData?.score || 0,
-                    resumeData: result.resumeJson,
-                    missingKeywords: result.initialAtsData?.missing_keywords || [],
-                    rawJdText: jdText, // Return to client for next step
-                    matchedKeywords: result.initialAtsData?.matched_keywords || [],
+                    resumeData: result.resumeJson
+                }
+            });
+        }
+
+        else if (mode === 'score') {
+            const body = await req.json();
+            const { resumeJson, optimizedResumeJson, initialAtsData, jdText } = body;
+
+            if (!resumeJson || !jdText) {
+                return NextResponse.json({ success: false, error: "Missing input for scoring" }, { status: 400 });
+            }
+
+            const state: any = {
+                rawResumeText: '',
+                rawJdText: jdText,
+                detectedLinks: [],
+                resumeJson: resumeJson,
+                initialAtsData: initialAtsData || null,
+                optimizedResumeJson: optimizedResumeJson || null,
+                finalAtsData: null,
+                rendercvYaml: '',
+            };
+
+            const result = await atsScorerNode(state);
+            const atsData = optimizedResumeJson ? result.finalAtsData : result.initialAtsData;
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    atsData
                 }
             });
         }
@@ -67,8 +91,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: false, error: "Missing input for optimization" }, { status: 400 });
             }
 
-            const graph = createOptimizationGraph();
-            const initialState: AgentState = {
+            const state: any = {
                 rawResumeText: '',
                 rawJdText: rawJdText,
                 detectedLinks: [],
@@ -79,37 +102,63 @@ export async function POST(req: Request) {
                 rendercvYaml: '',
             };
 
-            const result = (await graph.invoke(initialState)) as AgentState;
-
-            // Store scores in Supabase (moved here from original POST)
-            if (result.initialAtsData && result.finalAtsData) {
-                const { error: dbError } = await supabase.from('optimizations').insert({
-                    initial_score: result.initialAtsData.score,
-                    final_score: result.finalAtsData.score,
-                    candidate_name: result.resumeJson?.personal?.name || 'Unknown',
-                    missing_keywords: result.initialAtsData.missing_keywords,
-                    jd_text: rawJdText.substring(0, 500) // Store snippet
-                });
-
-                if (dbError) console.error("Supabase Error:", dbError);
-            }
+            const result = await resumeOptimizerNode(state);
 
             return NextResponse.json({
                 success: true,
                 data: {
-                    finalScore: result.finalAtsData?.score || 0,
-                    resumeData: result.optimizedResumeJson,
-                    yaml: result.rendercvYaml,
-                    initialScore: initialAtsData.score,
-                    missingKeywords: initialAtsData.missing_keywords,
-                    matchedKeywords: initialAtsData.matched_keywords,
-                    improvements: [
-                        "Optimized keyword density",
-                        "Rewrote bullets for impact",
-                        "Formatted for RenderCV"
-                    ]
+                    optimizedResumeJson: result.optimizedResumeJson
                 }
             });
+        }
+
+        else if (mode === 'yaml') {
+            const body = await req.json();
+            const { optimizedResumeJson } = body;
+
+            if (!optimizedResumeJson) {
+                return NextResponse.json({ success: false, error: "Missing optimized resume JSON" }, { status: 400 });
+            }
+
+            const state: any = {
+                rawResumeText: '',
+                rawJdText: '',
+                detectedLinks: [],
+                resumeJson: null,
+                initialAtsData: null,
+                optimizedResumeJson: optimizedResumeJson,
+                finalAtsData: null,
+                rendercvYaml: '',
+            };
+
+            const result = await rendercvGeneratorNode(state);
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    yaml: result.rendercvYaml
+                }
+            });
+        }
+
+        else if (mode === 'store') {
+            const body = await req.json();
+            const { initialScore, finalScore, candidateName, missingKeywords, jdText } = body;
+
+            const { error: dbError } = await supabase.from('optimizations').insert({
+                initial_score: initialScore,
+                final_score: finalScore,
+                candidate_name: candidateName || 'Unknown',
+                missing_keywords: missingKeywords || [],
+                jd_text: (jdText || '').substring(0, 500)
+            });
+
+            if (dbError) {
+                console.error("Supabase Error:", dbError);
+                return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+            }
+
+            return NextResponse.json({ success: true });
         }
 
         return NextResponse.json({ success: false, error: "Invalid mode" }, { status: 400 });
